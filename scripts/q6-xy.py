@@ -15,8 +15,8 @@ parser = argparse.ArgumentParser(description='Programa para graficar la distribu
 parser.add_argument('-f','--pfile',help='Input data file', required=False, action="store", default='q6')
 parser.add_argument('-s','--skip', help='Skip data frames', type=int, required=False, action="store", default=1)
 parser.add_argument('-g','--grid', help='Show grid', type=bool, required=False, action="store", default=False)
-parser.add_argument('-y','--ymin', help='Min y-scale', type=float, required=False, action="store", default=-5.0)
-parser.add_argument('-Y','--ymax', help='Max y-scale', type=float, required=False, action="store", default=20.0)
+parser.add_argument('-y','--ymin', help='Min y-scale', type=float, required=False, action="store", default=0.0)
+parser.add_argument('-Y','--ymax', help='Max y-scale', type=float, required=False, action="store", default=60.0)
 
 args =  parser.parse_args()
 preName = args.pfile + '_'
@@ -32,7 +32,7 @@ for file in glob.glob(preName + '*.dat'):
 
 #print fileFrames
 fileFrames.sort()
-
+n_file = 0
 params = {'backend': 'pdf',
         'interactive': False,
         'lines.linewidth': 2.0,
@@ -75,12 +75,12 @@ for f in tqdm(fileFrames[::skp_frm]):
     ax.set_ylim([scl_y_min,  scl_y_max])
     #  plt.ylim([yMin - 0.3 * alturaSilo,  1.1 * alturaSilo])
     # plt.ylim([yMin - 0.3 * alturaSilo, yMax + 0.15 * alturaSilo])
-    ax.set_xlabel('X')
-    ax.set_ylabel('Y')
-    ax.set_title(f'Heatmap Q6 {n_frame}')
+    ax.set_xlabel(r'$x$')
+    ax.set_ylabel(r'$y$')
+    ax.set_title(f'Heatmap $Q_6$ {n_frame}')
 
     ax2 =fig.add_subplot(122)
-    ax2.set_title(f'KDE Q6 {n_frame}')
+    ax2.set_title(f'KDE $Q_6$ {n_frame}')
     ax2.set_xlim([0, 1])
     ax2.set_xlabel(r"$Q_6$")
     ax2.set_ylim([0, 4])
@@ -90,6 +90,7 @@ for f in tqdm(fileFrames[::skp_frm]):
 
 
     plt.tight_layout()
-    plt.savefig(f.split('.')[0] + '.png')
+    plt.savefig(f'q6_{n_file:06d}.png')
+    n_file += 1
     plt.close()
 

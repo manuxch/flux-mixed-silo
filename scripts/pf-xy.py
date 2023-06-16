@@ -5,6 +5,7 @@ matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 from scipy.spatial import Voronoi, ConvexHull
+from scipy.stats import gaussian_kde
 import numpy as np
 import argparse
 import glob#, os
@@ -24,7 +25,7 @@ def voronoi_volumes(points):
 def packing_fraction(points, radii):
     vol = voronoi_volumes(points)
     pf = np.zeros(points.shape[0])
-    for i, p in enumerate(puntos):
+    for i in range(points.shape[0]):
         pf[i] = np.pi * radii[i]**2 / vol[i]
     return pf
 
@@ -32,8 +33,8 @@ parser = argparse.ArgumentParser(description='Programa para graficar la distribu
 parser.add_argument('-f','--pfile',help='Input data file', required=False, action="store", default='frm')
 parser.add_argument('-s','--skip', help='Skip data frames', type=int, required=False, action="store", default=1)
 parser.add_argument('-g','--grid', help='Show grid', type=bool, required=False, action="store", default=False)
-parser.add_argument('-y','--ymin', help='Min y-scale', type=float, required=False, action="store", default=-5.0)
-parser.add_argument('-Y','--ymax', help='Max y-scale', type=float, required=False, action="store", default=20.0)
+parser.add_argument('-y','--ymin', help='Min y-scale', type=float, required=False, action="store", default=0.0)
+parser.add_argument('-Y','--ymax', help='Max y-scale', type=float, required=False, action="store", default=60.0)
 
 args =  parser.parse_args()
 preName = args.pfile + '_'
@@ -66,10 +67,11 @@ params = {'backend': 'pdf',
 matplotlib.rcParams.update(params)
 
 nTotFiles = len(fileFrames)
+n_png = 0
 for f in tqdm(fileFrames[::skp_frm]):
-    fig = plt.figure(figsize=(10,10))
+    fig = plt.figure(figsize=(10,5))
     n_frame = (f.split('.')[0]).split('_')[1]
-    ax=fig.add_subplot(111, aspect='equal')
+    ax=fig.add_subplot(121, aspect='equal')
     idd = []
     x = []
     y = []
@@ -90,6 +92,7 @@ for f in tqdm(fileFrames[::skp_frm]):
     fout.write(f"# Frame: {n_frame}\n")
     fout.write(f"# id x y pf\n")
     for i in range(len(x)):
+        if pf[i] > 1: continue
         sout = f"{idd[i]} {x[i]} {y[i]} {pf[i]}\n"
         fout.write(sout)
     fout.close()
@@ -98,8 +101,8 @@ for f in tqdm(fileFrames[::skp_frm]):
     X, Y = np.meshgrid(xg, yg)
     heatmap = griddata((x, y), pf, (X, Y), method='linear')  # Interpolación lineal
     # heatmap = griddata((x, y), q6, (X, Y), method='cubic')  # Interpolación cúbica
-    plt.imshow(heatmap, extent=(min(x), max(x), min(y), max(y)), origin='lower', cmap='Greens')
-    plt.colorbar()  # Agrega una barra de color para mostrar la escala de valores
+    im = ax.imshow(heatmap, extent=(min(x), max(x), min(y), max(y)), origin='lower', cmap='Greens')
+    plt.colorbar(im)  # Agrega una barra de color para mostrar la escala de valores
     # plt.scatter(puntos[:, 0], puntos[:, 1], c=pf, cmap='hot', edgecolor='black')  # Muestra los puntos originales
     ax.xaxis.set_ticks_position('both')
     ax.yaxis.set_ticks_position('both')
@@ -107,13 +110,26 @@ for f in tqdm(fileFrames[::skp_frm]):
     #  ax.axes.get_xaxis().set_visible(False)
     #  ax.axes.get_yaxis().set_visible(False)
 
-    plt.ylim([scl_y_min,  scl_y_max])
+    ax.set_ylim([scl_y_min,  scl_y_max])
     #  plt.ylim([yMin - 0.3 * alturaSilo,  1.1 * alturaSilo])
     # plt.ylim([yMin - 0.3 * alturaSilo, yMax + 0.15 * alturaSilo])
-    plt.xlabel('X')
-    plt.ylabel('Y')
-    plt.title(f'Heatmap pf {n_frame}')
+    ax.set_xlabel(r'$x$')
+    ax.set_ylabel(r'$y$')
+    ax.set_title(f'Heatmap $\phi$ {n_frame}')
+
+
+    ax2 =fig.add_subplot(122)
+    ax2.set_title(f'KDE $\phi$ {n_frame}')
+    ax2.set_xlim([0, 1])
+    ax2.set_xlabel(r"$\phi$")
+    ax2.set_ylim([0, 8])
+    pf_x = np.linspace(0, 1, 400)
+    kde_q = gaussian_kde(pf)
+    ax2.plot(pf_x, kde_q(pf_x))
+
+
     plt.tight_layout()
-    plt.savefig('pf_' + n_frame + '.png')
+    plt.savefig(f'pf_{n_png:06d}.png')
+    n_png += 1
     plt.close()
 
