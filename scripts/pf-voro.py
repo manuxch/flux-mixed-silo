@@ -51,7 +51,7 @@ yg = np.linspace(min(y), max(y), 100)
 X, Y = np.meshgrid(xg, yg)
 print(puntos.shape, puntos.size, pf.shape)
 heatmap = griddata(puntos, pf, (X, Y), method='linear')  # Interpolación lineal
-plt.imshow(heatmap, extent=(min(x), max(x), min(y), max(y)), origin='lower', cmap='hot')
+plt.imshow(heatmap, extent=(min(x), max(x), min(y), max(y)), origin='lower', cmap='seismic')
 plt.colorbar()  # Agrega una barra de color para mostrar la escala de valores
 # plt.scatter(puntos[:, 0], puntos[:, 1], c=pf, cmap='hot', edgecolor='black')  # Muestra los puntos originales
 plt.xlabel('X')
