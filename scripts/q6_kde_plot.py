@@ -8,7 +8,7 @@ import matplotlib as mpl
 import numpy as np
 from scipy.stats import gaussian_kde
 
-parser = argparse.ArgumentParser(description="Ploteo de Q6 en una trayectoria.")
+parser = argparse.ArgumentParser(description="Ploteo del KDE de Q6 en una trayectoria.")
 parser.add_argument("-t", "--title", help="Títle", required=True)
 
 args = parser.parse_args()
@@ -44,4 +44,4 @@ plt.ylabel(r"KDE($Q_6$)")
 ca = plt.gca()
 plt.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap), label="Step")
 plt.tight_layout()
-plt.savefig("Q6_" + title + ".pdf")
+plt.savefig("Q6_KDE" + title + ".pdf")
