@@ -1,0 +1,84 @@
+# params.in
+# Archivo con parámetros que definen la simulación
+# de flux-mix-silo en Box2D
+# Manuel Carlevaro
+# 2023.06.23
+
+# Nota: Box2D utiliza el sistema métrico MKS
+
+# Detalles del contenedor
+
+# Silo 
+#	[Radio_silo]: ancho del silo (R)
+#	[H]: Altura del silo
+#	[Radio_salida]: Radio de la abertura de salida (r)
+#	[Caja_fric]: Coeficiente de fricción de la caja 0 <= Caja_fric 
+#	[Caja_rest]: Coeficiente de restitución de la caja 0 <= Caja_rest <= 1
+Radio_silo: 35.5
+H: 150.0
+Radio_salida: 8.45
+Silo_fric: 0.5
+Silo_rest: 0.1
+
+# Granos
+#	[noTipoGranos]: cantidad de tipos de granos diferentes
+#	Por cada tipo de grano:
+#	[noGranos radio nLados dens fric rest ]
+#	(int double int double double double)
+#	Notas:
+#		nLados = 1 es un disco, o 3 <= nLados <= 8
+#		[radio] = m, [dens] = kg/m¹
+#		[fric]: Coeficiente de fricción del grano 0 <= fric 
+#		[rest]: Coeficiente de restitución del grano 0 <= rest <= 1
+noTipoGranos: 1
+6000 0.5 1 1.27324 0.5 0.1 
+
+# Control de la simulación
+# [timeStep]: Paso de integración del movimiento (en s)
+# [tFill]: Tiempo con la tapa del silo colocada (en s). Si < timeStep, espera al reposo
+# [tMax]: Máximo tiempo de simulación (en s)
+# [pIter]: iteraciones de posicion para la satisfacción de restricciones
+# [vIter]: iteraciones de velocidad para la satisfacción de restricciones
+# [g]: Aceleracion de la gravedad (componente y)
+# [theta]: Ángulo de inclinación del plano de la caja respecto de la horizontal (grados)
+# [Bullets]: T si se consideran bullets los granos
+# [RandomSeed]: Semilla del generador de números aleatorios
+timeStep: 0.01 
+tMax: 10.0
+tFill: 2.0
+pIter: 60
+vIter: 60
+g: -1.0
+Reinyected: F
+Bullets: T
+RandomSeed: 13
+
+# Parámetros de registro
+# [dirID]: sufijo del nombre del directorio de guardado de frames
+# [preFrameFile]: prefijo del archivo de salida de frames
+# [saveFrameFreq]: Paso de guardado de los frames
+# [fluxFile]: nombre del archivo de guardado de flujo
+# [fluxFreq]: paso de guardado de flujo
+# [Q6_Freq]: paso de guardado de Q6
+# [frm_Atasco]: T si guardo frames de atascos, F si no 
+# [preAtascoFrm]: prefijo de los archivos de frames de atascos 
+# [VE_freq]: Frecuencia de guardado de velocidades y energías (en pasos) 
+# [veFile]: Archivo de guardado de velocidades y energías
+# [saveForcesFreq]: paso de guardado de fuerzas de contacto (0: no guarda)
+# [tStartCF]: instante de inicio de guardado de fuerzas de contacto
+# [tEndCF]: instante de final de guardado de fuerzas de contacto
+dirID: tilt-silo
+preFrameFile: frm
+saveFrameFreq: 50
+fluxFile: flx.dat
+fluxFreq: 5
+Q6_Freq: 10
+frm_Atasco: T
+preAtascoFrm: atc 
+VE_freq: 0
+veFile: velEnergias.dat
+saveForcesFreq: 0
+tStartCF: 0.0
+tEndCF: 0.0
+
+# Fin de params.ini
