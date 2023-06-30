@@ -4,29 +4,38 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
-from scipy.spatial import Voronoi, ConvexHull
+from scipy.spatial import Voronoi, ConvexHull, voronoi_plot_2d
 from scipy.stats import gaussian_kde
 import numpy as np
 import argparse
 import glob#, os
 from tqdm import tqdm
 
-def voronoi_volumes(points):
+def voronoi_volumes(points, i):
     v = Voronoi(points)
+    ffig = voronoi_plot_2d(v, show_vertices=False, line_colors='orange',
+                           line_width=2, line_alpha=0.6, point_size=2)
+    plt.savefig('v2s-'+str(i)+'.png')
+    plt.close(ffig)
     vol = np.zeros(v.npoints)
     for i, reg_num in enumerate(v.point_region):
         indices = v.regions[reg_num]
         if -1 in indices: # some regions can be opened
             vol[i] = np.inf
         else:
-            vol[i] = ConvexHull(v.vertices[indices]).volume
+            try:
+                vol[i] = ConvexHull(v.vertices[indices]).volume
+            except:
+                print("Falla de cálculo de ConvexHull")
+                vol[i] = np.inf
     return vol
 
-def packing_fraction(points, radii):
-    vol = voronoi_volumes(points)
+def packing_fraction(points, radii, i):
+    vol = voronoi_volumes(points, i)
     pf = np.zeros(points.shape[0])
     for i in range(points.shape[0]):
         pf[i] = np.pi * radii[i]**2 / vol[i]
+        # print(f"i: {i}, {points[i]}, r: {radii[i]}, vp: {np.pi* radii[i]**2}, vv: {vol[i]}, pf: {pf[i]}")
     return pf
 
 parser = argparse.ArgumentParser(description='Programa para graficar la distribución espacial de PF.')
@@ -73,6 +82,7 @@ for f in tqdm(fileFrames[::skp_frm]):
     n_frame = (f.split('.')[0]).split('_')[1]
     ax=fig.add_subplot(121, aspect='equal')
     idd = []
+    tipo = []
     x = []
     y = []
     r = []
@@ -83,16 +93,18 @@ for f in tqdm(fileFrames[::skp_frm]):
         l = linea.split()
         if int(l[0]) > 0:
             idd.append(int(l[0]))
+            tipo.append(int(l[1]))
             x.append(float(l[2]))
             y.append(float(l[3]))
             r.append(float(l[4]))
     puntos = np.stack((x,y), axis=1)
-    pf = packing_fraction(puntos, r)
+    pf = packing_fraction(puntos, r, n_frame)
     fout = open('pf_' + n_frame + '.dat', 'w')
     fout.write(f"# Frame: {n_frame}\n")
     fout.write(f"# id x y pf\n")
     for i in range(len(x)):
-        if pf[i] > 1: continue
+        # if pf[i] > 1:
+            # print(f"i: {i}, tipo: {tipo[i]}, x: {x[i]} y: {y[i]} pf: {pf[i]}")
         sout = f"{idd[i]} {x[i]} {y[i]} {pf[i]}\n"
         fout.write(sout)
     fout.close()

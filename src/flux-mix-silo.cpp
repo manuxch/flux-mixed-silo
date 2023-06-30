@@ -43,7 +43,7 @@ class MyRayCastCallback : public b2RayCastCallback {
 int main(int argc, char *argv[])
 {
     cout << "# flux-mix-silo" << endl;
-    cout << "# v1.0 [2023.06.16]" << endl;
+    cout << "# v1.1 [2023.06.30]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile);
     RandomGenerator rng(globalSetup->randomSeed);

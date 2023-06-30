@@ -14,7 +14,7 @@ for i in $(seq 10 19); do
     cd ${wdir}
     rL=${r[i]}
     rS=${r1[i]}
-    for j in 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67; do
+    for j in 2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71; do
         ifile=p-${cont}.in
         sed -e "s/__rL__/${rL}/g;s/__rS__/${rS}/g;s/__seed__/${j}/g;s/__case__/${c}/g" ${tpl} > ${ifile}
         let cont++

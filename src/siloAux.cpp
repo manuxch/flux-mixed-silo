@@ -204,8 +204,8 @@ void saveContacts(b2World *w, float ts, int file_id, const GlobalSetup *globalSe
 }
 
 void saveQ6(b2World *w, int file_id, const GlobalSetup *globalSetup) {
-    string file_name = "frames_" + globalSetup->dirID +
-        "/q6_" + int2str(file_id) + ".dat";
+    string file_name = "frames_" + globalSetup->dirID + "/q6_"
+        + globalSetup->preFrameFile + "_" + int2str(file_id) + ".dat";
     std::ofstream ff;
     ff.open(file_name.c_str());
     ff << "# Step: " << file_id << endl;
