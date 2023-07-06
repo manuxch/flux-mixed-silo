@@ -86,6 +86,8 @@ if __name__ == "__main__":
                         type=int, default=5000, required=False)
     parser.add_argument("-r", "--r2", help="Valor objetivo de R^2 (default: 0.9999).",
                         type=float, default=0.9999, required=False)
+    parser.add_argument("-g", "--g_type", help="Tipo de grano (1, 2, ...) (Default 0 = total).",
+                        type=int, default=0, required=False)
 
     args = parser.parse_args()
     fin = args.flux
@@ -94,7 +96,11 @@ if __name__ == "__main__":
     plot = args.plot
     n_trials = args.n_trials
     r2 = args.r2
-    t, g = np.loadtxt(fin, usecols=(2, 5), unpack=True)
+    if args.g_type:
+        g_col = 2 + args.g_type
+    else:
+        g_col = 0
+    t, g = np.loadtxt(fin, usecols=(2, g_col), unpack=True)
     res = flujo_masico(t, g, m, tf, plot, n_trials, r2)
     if res:
         print(f"Caudal: ({res['caudal']:.3f} ± {res['cov_caudal']:.3f}) g/s")
