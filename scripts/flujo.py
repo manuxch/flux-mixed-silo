@@ -2,6 +2,7 @@
 import numpy as np
 import argparse
 from scipy.stats import linregress
+import scipy.stats as sps
 import sys
 import matplotlib.pyplot as plt
 
@@ -41,7 +42,7 @@ def flujo_masico(t, g, m, tf, plot, n_trials, r2):
     while mc_trial < n_trials:
         lim = np.sort(np.random.randint(idx_min, idx_max, size=2))
         n_points = lim[1] - lim[0]
-        if n_points < t.size * 0.1:
+        if n_points < t.size * 0.3:
             continue
         m, i, r, pv, mstd = linregress(t[lim[0]:lim[1]], g[lim[0]:lim[1]])
         if r**2 > r2:
@@ -102,8 +103,10 @@ if __name__ == "__main__":
         g_col = 0
     t, g = np.loadtxt(fin, usecols=(2, g_col), unpack=True)
     res = flujo_masico(t, g, m, tf, plot, n_trials, r2)
+    tinv = lambda p, df: abs(sps.t.ppf(p/2, df))
+    ts = tinv(0.01, len(t)-2)  # Intervalo de confianza del 98%
     if res:
-        print(f"Caudal: ({res['caudal']:.3f} ± {res['cov_caudal']:.3f}) g/s")
+        print(f"Caudal: ({res['caudal']:.3f} ± {ts * res['cov_caudal']:.3f}) g/s")
         print(f"r_0^2: {res['r2']:.6f}")
         print(f"Ajuste izquierdo: [{res['izq'][0]:.3f}, {res['izq'][1]:.3f}]")
         print(f"Ajuste derecho: [{res['der'][0]:.3f}, {res['der'][1]:.3f}]")
