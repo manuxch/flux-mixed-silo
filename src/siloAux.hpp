@@ -62,13 +62,11 @@ int countDesc(b2World *w, int *st, int paso,
 
 /*! Imprime las velocidades y energías
  * \param float timeS : tiempo de la simulación
- * \param ofstream* fileVE : archivo de salida
  * \param b2Word* w : mundo
  * \param GlobalSetup* parámetros globales
  * \return void
  */
-void printVE(float timeS, std::ofstream *ff, b2World *w, 
-        const GlobalSetup* gs);
+void printVE(int frm_id, float timeS, b2World *w, const GlobalSetup* gs);
 
 /*! \fn saveContacts
  * \brief Guarda las fuerzas de contacto normal y tangencial

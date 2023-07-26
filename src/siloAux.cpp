@@ -120,15 +120,26 @@ int countDesc(b2World *w, int *st, int paso,
     double tStep = gs->tStep;
     for (int i = 0; i < gs->noTipoGranos; ++i) granoDesc += st[i];
     BodyData* infGr;
-    b2Vec2 p;
-    double y_min = 0.0;
+    b2Vec2 p, pv;
+    double y_min = 0.0, radio;
     int nGranos = 0; // granos descargados en este check
     //int sumaTotal = 0;
     for (b2Body *bd = w->GetBodyList(); bd; bd = bd->GetNext()) {
         infGr = (BodyData*) (bd->GetUserData()).pointer;
         if (infGr->isGrain && infGr->isIn) {
             p = bd->GetPosition();
-            if (p.y > y_min) continue;
+            b2Fixture* fixt = bd->GetFixtureList();
+            b2Shape *shape = fixt->GetShape();
+            if (infGr->nLados == 1) {
+                radio = shape->m_radius;
+            }
+            else {
+                b2PolygonShape *poly = (b2PolygonShape*) shape;
+                b2Vec2* verts = (b2Vec2*) poly->m_vertices;
+                pv = b2Vec2(verts[0].x - p.x, verts[0].y - p.y);
+                radio = pv.Length();
+            }
+            if (p.y > y_min - radio) continue;
             infGr->isIn = false;
             nGranos++;
             granoDesc++;
@@ -145,12 +156,16 @@ int countDesc(b2World *w, int *st, int paso,
     return nGranos;
 }
 
-void printVE(float timeS, std::ofstream *ff, b2World *w,
-        const GlobalSetup* gs) {
-    b2Vec2 pi, vi, pj, pij; 
-    float wi, mi, Ii, vim, vt2 = 0.0;
+void printVE(int frm_id, float timeS, b2World *w, const GlobalSetup* gs) {
+    b2Vec2 pi, vi; 
+    float wi, mi, Ii, vim;
     b2Vec2 vt(0.0, 0.0);
-    double *eKin = new double[gs->noTipoGranos] {0.0};
+    string file_name = "frames_" + gs->dirID + "/"
+        + "ve_" + int2str(frm_id) + ".dat";
+    std::ofstream fileF;
+    fileF.open(file_name.c_str());
+    fileF << "# gID type x y vx vy w E_kin_lin E_kin_rot "
+        << " ## sim_time: " << timeS << endl;
     for (b2Body *bi = w->GetBodyList(); bi; bi = bi->GetNext()) {
         BodyData *igi = (BodyData*) (bi->GetUserData()).pointer;
         if (!igi->isGrain) {
@@ -162,15 +177,13 @@ void printVE(float timeS, std::ofstream *ff, b2World *w,
         wi = bi->GetAngularVelocity();
         mi = bi->GetMass();
         Ii = bi->GetInertia();
-        vt += vi;
-        vt2 += vim * vim;
-        eKin[igi->tipo] += 0.5 * (mi * vim * vim + Ii * wi * wi); 
+        fileF << igi->gID << " " << igi->tipo << " " 
+            << pi.x << " " << pi.y << " " 
+            << vi.x << " " << vi.y << " " << wi << " "
+            << 0.5 * mi * vim * vim << " "
+            << 0.5 * Ii * wi * wi << endl;
     }
-    *(ff) << timeS << " " << vt.Length() << " " << vt2 << " ";
-    for (int i = 0; i < gs->noTipoGranos; ++i) {
-        *(ff) << eKin[i] << " ";
-    }
-    *(ff) << endl;
+    fileF.close();
 }
 
 void saveContacts(b2World *w, float ts, int file_id, const GlobalSetup *globalSetup) {

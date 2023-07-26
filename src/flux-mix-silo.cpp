@@ -43,7 +43,7 @@ class MyRayCastCallback : public b2RayCastCallback {
 int main(int argc, char *argv[])
 {
     cout << "# flux-mix-silo" << endl;
-    cout << "# v1.1 [2023.06.30]" << endl;
+    cout << "# v1.2 [2023.07.23]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile);
     RandomGenerator rng(globalSetup->randomSeed);
@@ -208,6 +208,9 @@ int main(int argc, char *argv[])
     bool saveFrm = (globalSetup->saveFrameFreq > 0 ? true : false);
     bool saveFlux = (globalSetup->fluxFreq > 0 ? true : false);
     bool save_Q6 = (globalSetup->q6_freq > 0 ? true : false);
+    bool saveForces = (globalSetup->saveContactFreq > 0 ? true : false);
+    bool saveVE = (globalSetup->veFreq > 0 ? true : false);
+    bool saveCF;
     int paso = 0;
     bool t_fill = (globalSetup->tFill > globalSetup->tStep ? true : false);
     // El tiempo de llenado funciona si los granos no son bullets
@@ -247,7 +250,7 @@ int main(int argc, char *argv[])
     timeS = 0.0f;
     paso++;
     
-    std::ofstream fileFlux;
+    std::ofstream fileFlux, fileVE;
     if (saveFlux) {
         fileFlux.open((globalSetup->fluxFile).c_str());
         fileFlux << "#grainDesc type time ";
@@ -260,8 +263,6 @@ int main(int argc, char *argv[])
     saveFrame(&world, paso, globalSetup);
     cout << "# Frame inicial " << paso << " guardado en " << timeS << endl;
 
-    bool saveForces = (globalSetup->saveContactFreq > 0 ? true : false);
-    bool saveCF;
     int forceFrame = 0; /*!< Contador de frames de fuerzas de contacto */
 
     // Inicio el avance del tiempo en la simulación
@@ -298,6 +299,10 @@ int main(int argc, char *argv[])
             saveQ6(&world, paso, globalSetup);
         }
 
+        // Cálculo y guardado de velocidades y energías
+        if (saveVE && !(paso % globalSetup->veFreq)) {
+            printVE(paso, timeS, &world, globalSetup);
+        }
         // Cálculo de descarga y reinyección
         deltaG = countDesc(&world, sumaTipo, paso, fileFlux, globalSetup);
         nGranosDesc += deltaG;
