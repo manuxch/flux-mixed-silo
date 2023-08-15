@@ -33,3 +33,5 @@
 
 # Otros
 **/.directory
+**/.jupyter
+**/*_checkpoints
