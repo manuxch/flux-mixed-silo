@@ -7,7 +7,7 @@
  *
  * \author Manuel Carlevaro <manuel@iflysib.unlp.edu.ar>
  *
- * \version 1.0 
+ * \version 1.3 
  *
  * \date 2023.06.23
  *
@@ -43,7 +43,7 @@ class MyRayCastCallback : public b2RayCastCallback {
 int main(int argc, char *argv[])
 {
     cout << "# flux-mix-silo" << endl;
-    cout << "# v1.2 [2023.07.23]" << endl;
+    cout << "# v1.3 [2023.08.20]" << endl;
     string inputParFile(argv[1]);
     GlobalSetup *globalSetup = new GlobalSetup(inputParFile);
     RandomGenerator rng(globalSetup->randomSeed);
@@ -198,7 +198,7 @@ int main(int argc, char *argv[])
     int32 vIterations = globalSetup->vIter;
 
     cout << "# Inicio de la simulación..." << endl;
-    b2Vec2 pos, vtmp; 
+    b2Vec2 pos; 
     float angle = 0.0, dist_out_2;
     int nGranosDesc = 0;
     BodyData *infGr;
